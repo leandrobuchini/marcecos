@@ -1,42 +1,55 @@
-const Database = require('better-sqlite3')
-const path = require('path')
+const { Pool } = require('pg')
+const bcrypt = require('bcryptjs')
+require('dotenv').config()
 
-// Crea o abre el archivo de base de datos
-const db = new Database(path.join(__dirname, 'marcecos.db'))
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_URL.includes('render.com')
+    ? { rejectUnauthorized: false }
+    : false
+})
 
-// Crea las tablas si no existen
-db.exec(`
-    CREATE TABLE IF NOT EXISTS productos (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+const init = async () => {
+  try {
+    // Crea las tablas si no existen
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS productos (
+        id SERIAL PRIMARY KEY,
         nombre TEXT NOT NULL,
-        precio REAL NOT NULL,
+        precio NUMERIC NOT NULL,
         categoria TEXT NOT NULL,
         descripcion TEXT,
         imagen TEXT,
         stock INTEGER DEFAULT 0,
-        creado_en DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
-        
-    CREATE TABLE IF NOT EXISTS usuarios (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS usuarios (
+        id SERIAL PRIMARY KEY,
         email TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
         rol TEXT DEFAULT 'admin'
-    );
-`) 
+      );
+    `)
 
-console.log('Base de datos lista')
+    // Crea el usuario admin si no existe
+    const resultado = await pool.query('SELECT * FROM usuarios WHERE email = $1', ['admin@marcecos.com'])
+    
+    if (resultado.rows.length === 0) {
+      const passwordEncriptada = bcrypt.hashSync('marcecos123', 10)
+      await pool.query(
+        'INSERT INTO usuarios (email, password, rol) VALUES ($1, $2, $3)',
+        ['admin@marcecos.com', passwordEncriptada, 'admin']
+      )
+      console.log('Usuario admin creado')
+    }
 
-const bcrypt = require('bcryptjs')
-
-// Crea el usuario admin si no existe
-const adminExiste = db.prepare('SELECT * FROM usuarios WHERE email = ?').get('admin@marcecos.com')
-
-if (!adminExiste) {
-  const passwordEncriptada = bcrypt.hashSync('marcecos123', 10)
-  db.prepare('INSERT INTO usuarios (email, password, rol) VALUES (?, ?, ?)')
-    .run('admin@marcecos.com', passwordEncriptada, 'admin')
-  console.log('Usuario admin creado')
+    console.log('Base de datos lista')
+  } catch (error) {
+    console.log('Error al inicializar la base de datos:', error.message)
+  }
 }
 
-module.exports = db
+init()
+
+module.exports = pool
