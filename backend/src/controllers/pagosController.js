@@ -37,9 +37,9 @@ const crearPreferencia = async (req, res) => {
           id: String(item.id)
         })),
         back_urls: {
-          success: 'http://localhost:5173/confirmacion?status=success',
-          failure: 'http://localhost:5173/confirmacion?status=failure',
-          pending: 'http://localhost:5173/confirmacion?status=pending'
+          success: 'https://marcecos.vercel.app/confirmacion?status=success',
+          failure: 'https://marcecos.vercel.app/confirmacion?status=failure',
+          pending: 'https://marcecos.vercel.app/confirmacion?status=pending'
         },
         metadata: {
           items: items.map(item => ({
