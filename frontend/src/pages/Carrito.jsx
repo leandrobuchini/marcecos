@@ -1,9 +1,31 @@
 import { useNavigate } from 'react-router-dom'
 import { useCarrito } from '../context/CarritoContext'
+import { useState } from 'react'
+import api from '../services/api'
 
 function Carrito() {
   const navigate = useNavigate()
-  const { carrito, cambiarCantidad, eliminarDelCarrito, total, cantidadItems } = useCarrito()
+  const { carrito, cambiarCantidad, eliminarDelCarrito, vaciarCarrito, total, cantidadItems } = useCarrito()
+const [procesando, setProcesando] = useState(false)
+  
+const handlePagar = async () => {
+  console.log('click en pagar', carrito)
+  if (carrito.length === 0) return
+  setProcesando(true)
+  try {
+    // Guarda el carrito en localStorage antes de ir a MercadoPago
+    localStorage.setItem('carrito_comprado', JSON.stringify(
+      carrito.map(item => ({ id: item.id, cantidad: item.cantidad }))
+    ))
+    const res = await api.post('/pagos/crear', { items: carrito })
+    console.log('respuesta:', res.data)
+    window.location.href = res.data.url
+  } catch (error) {
+    console.log('error:', error)
+    alert('Error al procesar el pago. Intentá de nuevo.')
+    setProcesando(false)
+  }
+}
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -61,11 +83,16 @@ function Carrito() {
             <span className="text-blue-600 font-bold text-xl">${total.toLocaleString()}</span>
           </div>
           <button
-            onClick={() => navigate('/confirmacion')}
-            className="w-full bg-green-500 text-white py-4 rounded-full font-bold text-lg hover:bg-green-600 transition-all"
-          >
-            PAGAR
-          </button>
+  onClick={handlePagar}
+  disabled={procesando}
+  className={`w-full py-4 rounded-full font-bold text-lg transition-all
+    ${procesando
+      ? 'bg-gray-400 text-white cursor-not-allowed'
+      : 'bg-green-500 text-white hover:bg-green-600'
+    }`}
+>
+  {procesando ? 'Procesando...' : 'PAGAR CON MERCADOPAGO'}
+</button>
           <p className="text-center text-gray-400 text-xs mt-3">ENVÍOS A TODO EL PAÍS · PAGOS 100% SEGUROS</p>
         </div>
       )}

@@ -15,6 +15,16 @@ function AdminPanel() {
   const [error, setError] = useState('')
   const [editando, setEditando] = useState(null)
   const [subiendoFoto, setSubiendoFoto] = useState(false)
+  const [pedidos, setPedidos] = useState([])
+
+  const cargarPedidos = () => {
+  api.get('/pedidos')
+    .then(res => {
+      const data = Array.isArray(res.data) ? res.data : []
+      setPedidos(data)
+    })
+    .catch(() => setError('Error al cargar pedidos'))
+}
 
   // Trae todos los productos
   const cargarProductos = () => {
@@ -28,6 +38,8 @@ function AdminPanel() {
 
   useEffect(() => {
     cargarProductos()
+    cargarProductos()
+    cargarPedidos()
   }, [])
 
   // Limpia el formulario
@@ -40,6 +52,7 @@ function AdminPanel() {
     setEditando(null)
     setError('')
     setMensaje('')
+
   }
 
   const handleFoto = async (e) => {
@@ -131,22 +144,29 @@ function AdminPanel() {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-300 bg-white">
-        <button
-          onClick={() => { setVista('agregar'); limpiarFormulario() }}
-          className={`flex-1 py-3 text-sm font-semibold ${vista === 'agregar' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}
-        >
-          {editando ? 'Editando' : 'Agregar'}
-        </button>
-        <button
-          onClick={() => { setVista('lista'); limpiarFormulario() }}
-          className={`flex-1 py-3 text-sm font-semibold ${vista === 'lista' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}
-        >
-          Mis productos ({productos.length})
-        </button>
-      </div>
+<div className="flex border-b border-gray-300 bg-white">
+  <button
+    onClick={() => { setVista('agregar'); limpiarFormulario() }}
+    className={`flex-1 py-3 text-sm font-semibold ${vista === 'agregar' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}
+  >
+    {editando ? 'Editando' : 'Agregar'}
+  </button>
+  <button
+    onClick={() => { setVista('lista'); limpiarFormulario() }}
+    className={`flex-1 py-3 text-sm font-semibold ${vista === 'lista' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}
+  >
+    Mis productos ({productos.length})
+  </button>
+  <button
+    onClick={() => { setVista('pedidos'); limpiarFormulario() }}
+    className={`flex-1 py-3 text-sm font-semibold ${vista === 'pedidos' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}
+  >
+    Pedidos ({pedidos.length})
+  </button>
+</div>
 
       {/* Vista Agregar / Editar */}
+
       {vista === 'agregar' && (
         <div className="px-4 py-6 flex flex-col gap-4 max-w-md mx-auto">
 
@@ -281,6 +301,61 @@ function AdminPanel() {
                     Eliminar
                   </button>
                 </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+      {/* Vista Pedidos */}
+      {vista === 'pedidos' && (
+        <div className="px-4 py-6 flex flex-col gap-4 max-w-md mx-auto">
+          {pedidos.length === 0 ? (
+            <p className="text-center text-gray-400 mt-10">No hay pedidos todavía</p>
+          ) : (
+            pedidos.map(pedido => (
+              <div key={pedido.id} className="bg-white rounded-xl shadow p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <p className="font-bold text-gray-800">Pedido #{pedido.id}</p>
+                    <p className="text-gray-400 text-xs">
+                      {new Date(pedido.creado_en).toLocaleDateString('es-AR', {
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                      })}
+                    </p>
+                  </div>
+                  <span className={`text-xs px-3 py-1 rounded-full font-semibold
+                    ${pedido.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-600' : ''}
+                    ${pedido.estado === 'enviado' ? 'bg-blue-100 text-blue-600' : ''}
+                    ${pedido.estado === 'entregado' ? 'bg-green-100 text-green-600' : ''}
+                  `}>
+                    {pedido.estado}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-2 mb-3">
+                  {pedido.items.map((item, index) => (
+                    <div key={index} className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">{item.nombre} x{item.cantidad}</span>
+                      <span className="text-gray-800 font-semibold">${Number(item.precio * item.cantidad).toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-between border-t border-gray-100 pt-2 mb-3">
+                  <span className="font-bold text-gray-700">Total</span>
+                  <span className="font-bold text-blue-600">${Number(pedido.total).toLocaleString()}</span>
+                </div>
+                <select
+                  value={pedido.estado}
+                  onChange={async (e) => {
+                    await api.put(`/pedidos/${pedido.id}`, { estado: e.target.value })
+                    cargarPedidos()
+                  }}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none"
+                >
+                  <option value="pendiente">Pendiente</option>
+                  <option value="enviado">Enviado</option>
+                  <option value="entregado">Entregado</option>
+                </select>
               </div>
             ))
           )}

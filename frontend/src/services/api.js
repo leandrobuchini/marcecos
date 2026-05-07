@@ -2,7 +2,7 @@ import axios from 'axios'
 
 //Direccion del backend
 const api = axios.create({
-    baseURL: 'https://marcecos-backend.onrender.com/api'
+  baseURL: 'http://localhost:4000/api'
 })
 
 // Esto agrega el token automaticamente en cada peticion

@@ -11,7 +11,6 @@ const pool = new Pool({
 
 const init = async () => {
   try {
-    // Crea las tablas si no existen
     await pool.query(`
       CREATE TABLE IF NOT EXISTS productos (
         id SERIAL PRIMARY KEY,
@@ -30,9 +29,34 @@ const init = async () => {
         password TEXT NOT NULL,
         rol TEXT DEFAULT 'admin'
       );
+
+      CREATE TABLE IF NOT EXISTS pedidos (
+        id SERIAL PRIMARY KEY,
+        items JSONB NOT NULL,
+        total NUMERIC NOT NULL,
+        estado TEXT DEFAULT 'pendiente',
+        creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
     `)
 
-    // Crea el usuario admin si no existe
+    await pool.query(`
+  DROP TABLE IF EXISTS pedidos;
+  CREATE TABLE pedidos (
+    id SERIAL PRIMARY KEY,
+    items JSONB NOT NULL,
+    total NUMERIC NOT NULL,
+    estado TEXT DEFAULT 'pendiente',
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+`)
+console.log('Tabla pedidos recreada')
+
+    await pool.query(`
+      ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+    `)
+
+    console.log('Base de datos lista')
+
     const resultado = await pool.query('SELECT * FROM usuarios WHERE email = $1', ['admin@marcecos.com'])
     
     if (resultado.rows.length === 0) {
@@ -44,7 +68,6 @@ const init = async () => {
       console.log('Usuario admin creado')
     }
 
-    console.log('Base de datos lista')
   } catch (error) {
     console.log('Error al inicializar la base de datos:', error.message)
   }
