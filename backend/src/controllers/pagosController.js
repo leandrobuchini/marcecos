@@ -1,3 +1,4 @@
+const { enviarEmailNuevoPedido } = require('../services/emailService')
 const { MercadoPagoConfig, Preference } = require('mercadopago')
 const db = require('../database/db')
 require('dotenv').config()
@@ -64,6 +65,10 @@ const crearPreferencia = async (req, res) => {
       [JSON.stringify(items), total]
     )
     console.log('Pedido guardado! Total:', total)
+
+    // Enviar email de notificación
+    const nuevoPedido = { id: 'nuevo', items, total }
+    await enviarEmailNuevoPedido(nuevoPedido)
 
     res.json({ url: resultado.init_point })
 
