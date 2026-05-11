@@ -5,7 +5,7 @@ import api from '../services/api'
 
 function Carrito() {
   const navigate = useNavigate()
-  const { carrito, cambiarCantidad, eliminarDelCarrito, vaciarCarrito, total, cantidadItems } = useCarrito()
+  const { carrito, cambiarCantidad, eliminarDelCarrito, total, cantidadItems } = useCarrito()
 const [procesando, setProcesando] = useState(false)
   
 const handlePagar = async () => {
@@ -93,6 +93,19 @@ const handlePagar = async () => {
 >
   {procesando ? 'Procesando...' : 'PAGAR CON MERCADOPAGO'}
 </button>
+
+
+  <a href={`https://wa.me/543425298828?text=${encodeURIComponent(
+    '🛒 Hola! Quiero hacer un pedido en Marcecos:\n\n' +
+    carrito.map(item => `• ${item.nombre} x${item.cantidad} - $${Number(item.precio * item.cantidad).toLocaleString()}`).join('\n') +
+    `\n\nTotal: $${total.toLocaleString()}`
+  )}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="w-full mt-3 py-4 rounded-full font-bold text-lg bg-green-400 text-white text-center block hover:bg-green-500 transition-all"
+>
+  📱 Consultar por WhatsApp
+</a>
           <p className="text-center text-gray-400 text-xs mt-3">ENVÍOS A TODO EL PAÍS · PAGOS 100% SEGUROS</p>
         </div>
       )}
