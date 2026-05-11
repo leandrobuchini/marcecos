@@ -9,6 +9,11 @@ function Catalogo() {
   const navigate = useNavigate()
   const { agregarAlCarrito, cantidadItems } = useCarrito()
   const [categoriaActiva, setCategoriaActiva] = useState('todos')
+  const [precioMin, setPrecioMin] = useState('')
+  const [precioMax, setPrecioMax] = useState('')
+  const [soloConStock, setSoloConStock] = useState(false)
+  const [orden, setOrden] = useState('') 
+  const [mostrarFiltros, setMostrarFiltros] = useState(false)
 
   useEffect(() => {
     api.get('/productos')
@@ -19,11 +24,20 @@ function Catalogo() {
       .catch(err => console.log(err))
   }, [])
 
-  const productosFiltrados = productos.filter(p => {
-  const coincideBusqueda = p.nombre.toLowerCase().includes(busqueda.toLowerCase())
-  const coincideCategoria = categoriaActiva === 'Todos' || p.categoria === categoriaActiva
-  return coincideBusqueda && coincideCategoria
-})
+  const productosFiltrados = productos
+  .filter(p => {
+    const coincideBusqueda = p.nombre.toLowerCase().includes(busqueda.toLowerCase())
+    const coincideCategoria = categoriaActiva === 'Todos' || p.categoria === categoriaActiva
+    const coincidePrecioMin = precioMin === '' || Number(p.precio) >= Number(precioMin)
+    const coincidePrecioMax = precioMax === '' || Number(p.precio) <= Number(precioMax)
+    const coincideStock = !soloConStock || p.stock > 0
+    return coincideBusqueda && coincideCategoria && coincidePrecioMin && coincidePrecioMax && coincideStock
+  })
+  .sort((a, b) => {
+    if (orden === 'menor') return Number(a.precio) - Number(b.precio)
+    if (orden === 'mayor') return Number(b.precio) - Number(a.precio)
+    return 0
+  })
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -83,7 +97,74 @@ function Catalogo() {
           onChange={e => setBusqueda(e.target.value)}
           className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm outline-none"
         />
-        <span className="text-gray-500">⚙️</span>
+        <button 
+  onClick={() => setMostrarFiltros(!mostrarFiltros)}
+  className={`p-2 rounded-full ${mostrarFiltros ? 'bg-blue-600 text-white' : 'bg-white text-gray-500 border border-gray-300'}`}
+>
+  ⚙️
+</button>
+{/* Panel de filtros */}
+{mostrarFiltros && (
+  <div className="mx-4 mt-3 bg-white rounded-xl shadow p-4 flex flex-col gap-3">
+    
+    <p className="font-semibold text-gray-700 text-sm">Filtros avanzados</p>
+
+    {/* Rango de precio */}
+    <div>
+      <p className="text-xs text-gray-500 mb-2">Rango de precio</p>
+      <div className="flex gap-2">
+        <input
+          type="number"
+          placeholder="Mín $"
+          value={precioMin}
+          onChange={e => setPrecioMin(e.target.value)}
+          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none"
+        />
+        <input
+          type="number"
+          placeholder="Máx $"
+          value={precioMax}
+          onChange={e => setPrecioMax(e.target.value)}
+          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none"
+        />
+      </div>
+    </div>
+
+    {/* Ordenar por precio */}
+    <div>
+      <p className="text-xs text-gray-500 mb-2">Ordenar por precio</p>
+      <select
+        value={orden}
+        onChange={e => setOrden(e.target.value)}
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none"
+      >
+        <option value="">Sin orden</option>
+        <option value="menor">Menor a mayor</option>
+        <option value="mayor">Mayor a menor</option>
+      </select>
+    </div>
+
+    {/* Solo con stock */}
+    <div className="flex items-center justify-between">
+      <p className="text-sm text-gray-700">Solo productos con stock</p>
+      <button
+        onClick={() => setSoloConStock(!soloConStock)}
+        className={`w-12 h-6 rounded-full transition-all ${soloConStock ? 'bg-blue-600' : 'bg-gray-300'}`}
+      >
+        <div className={`w-5 h-5 bg-white rounded-full shadow transition-all mx-0.5 ${soloConStock ? 'translate-x-6' : 'translate-x-0'}`} />
+      </button>
+    </div>
+
+    {/* Limpiar filtros */}
+    <button
+      onClick={() => { setPrecioMin(''); setPrecioMax(''); setSoloConStock(false); setOrden('') }}
+      className="w-full border border-gray-300 text-gray-500 py-2 rounded-lg text-sm"
+    >
+      Limpiar filtros
+    </button>
+
+  </div>
+)}
       </div>
 
       {/* Productos */}
