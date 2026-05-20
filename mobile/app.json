@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Marcecos",
+    "slug": "marcecos",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#111827"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#111827"
+      },
+      "package": "com.marcecos.jugueteria",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Marcecos necesita acceso a tu galería para subir fotos de productos."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "c2525071-9d3a-4f39-b46f-8ae6e5fed43c"
+      }
+    }
+  }
+}
