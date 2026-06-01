@@ -60,10 +60,11 @@ const crearPreferencia = async (req, res) => {
     }
 
     const total = items.reduce((acc, item) => acc + (item.precio * item.cantidad), 0)
-    await db.query(
-      'INSERT INTO pedidos (items, total) VALUES ($1, $2)',
-      [JSON.stringify(items), total]
-    )
+    const clienteId = req.usuario?.id || null
+await db.query(
+  'INSERT INTO pedidos (items, total, cliente_id) VALUES ($1, $2, $3)',
+  [JSON.stringify(items), total, clienteId]
+)
     console.log('Pedido guardado! Total:', total)
 
     // Enviar email de notificación

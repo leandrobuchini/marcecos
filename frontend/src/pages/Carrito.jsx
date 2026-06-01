@@ -1,16 +1,28 @@
 import { useNavigate } from 'react-router-dom'
 import { useCarrito } from '../context/CarritoContext'
+import api from '../services/api'
 
 export default function Carrito() {
   const navigate = useNavigate()
   const { carrito, cambiarCantidad, eliminarDelCarrito, total, cantidadItems } = useCarrito()
 
-  const handleWhatsApp = () => {
-    const mensaje = '🛒 Hola! Quiero hacer un pedido en Marcecos:\n\n' +
-      carrito.map(item => `• ${item.nombre} x${item.cantidad} - $${Number(item.precio * item.cantidad).toLocaleString()}`).join('\n') +
-      `\n\nTotal: $${total.toLocaleString()}`
-    window.open(`https://wa.me/543425298828?text=${encodeURIComponent(mensaje)}`, '_blank')
+  const handleWhatsApp = async () => {
+  const token = localStorage.getItem('cliente_token')
+  
+  // Si el cliente está logueado, guardamos el pedido
+  if (token) {
+    try {
+      await api.post('/pagos/crear', { items: carrito })
+    } catch {
+      console.log('Error al guardar pedido')
+    }
   }
+
+  const mensaje = '🛒 Hola! Quiero hacer un pedido en Marcecos:\n\n' +
+    carrito.map(item => `• ${item.nombre} x${item.cantidad} - $${Number(item.precio * item.cantidad).toLocaleString()}`).join('\n') +
+    `\n\nTotal: $${total.toLocaleString()}`
+  window.open(`https://wa.me/543425298828?text=${encodeURIComponent(mensaje)}`, '_blank')
+}
 
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col">

@@ -14,6 +14,7 @@ const productosRoutes = require('./routes/productosRoutes')
 const authRoutes = require('./routes/authRoutes')
 const pagosRoutes = require('./routes/pagosRoutes')
 const pedidosRoutes = require('./routes/pedidosRoutes')
+const clientesRoutes = require('./routes/clientesRoutes')
 
 // Permite recibir datos en formato JSON
 app.use(express.json())
@@ -30,6 +31,7 @@ app.use('/api/productos', productosRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/pagos', pagosRoutes)
 app.use('/api/pedidos', pedidosRoutes)
+app.use('/api/clientes', clientesRoutes)
 
 // Puerto donde corre el servidor
 const PORT = process.env.PORT || 4000

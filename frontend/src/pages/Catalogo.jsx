@@ -43,28 +43,43 @@ export default function Catalogo() {
     <div className="min-h-screen bg-neutral-50">
 
       {/* Navbar */}
-      <div className="bg-white border-b border-neutral-100 px-4 py-4 flex items-center justify-between sticky top-0 z-10">
-        <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Marcecos</h1>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('/admin')}
-            className="text-xs font-medium text-neutral-500 hover:text-neutral-900 transition-colors"
-          >
-            Admin
-          </button>
-          <button
-            onClick={() => navigate('/carrito')}
-            className="relative w-9 h-9 flex items-center justify-center rounded-full bg-neutral-100 hover:bg-neutral-200 transition-colors"
-          >
-            <span className="text-base">🛒</span>
-            {cantidadItems > 0 && (
-              <span className="absolute -top-1 -right-1 bg-neutral-900 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-medium">
-                {cantidadItems}
-              </span>
-            )}
-          </button>
-        </div>
-      </div>
+<div className="bg-white border-b border-neutral-100 px-4 py-4 flex items-center justify-between sticky top-0 z-10">
+  <h1 className="text-lg font-semibold tracking-tight text-neutral-900">Marcecos</h1>
+  <div className="flex items-center gap-3">
+    {localStorage.getItem('cliente_token') ? (
+      <button
+        onClick={() => navigate('/perfil')}
+        className="w-8 h-8 rounded-full bg-neutral-900 text-white text-xs font-bold flex items-center justify-center hover:bg-neutral-700 transition-colors"
+      >
+        {JSON.parse(localStorage.getItem('cliente') || '{}').nombre?.charAt(0).toUpperCase()}
+      </button>
+    ) : (
+      <button
+        onClick={() => navigate('/login')}
+        className="text-xs font-medium text-neutral-500 hover:text-neutral-900 transition-colors"
+      >
+        Ingresar
+      </button>
+    )}
+    <button
+      onClick={() => navigate('/admin')}
+      className="text-xs font-medium text-neutral-500 hover:text-neutral-900 transition-colors"
+    >
+      Admin
+    </button>
+    <button
+      onClick={() => navigate('/carrito')}
+      className="relative w-9 h-9 flex items-center justify-center rounded-full bg-neutral-100 hover:bg-neutral-200 transition-colors"
+    >
+      <span className="text-base">🛒</span>
+      {cantidadItems > 0 && (
+        <span className="absolute -top-1 -right-1 bg-neutral-900 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-medium">
+          {cantidadItems}
+        </span>
+      )}
+    </button>
+  </div>
+</div>
 
       {/* Hero banner */}
       <div className="bg-neutral-900 px-6 py-8">

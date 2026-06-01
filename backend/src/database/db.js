@@ -30,29 +30,25 @@ const init = async () => {
         rol TEXT DEFAULT 'admin'
       );
 
+      CREATE TABLE IF NOT EXISTS clientes (
+        id SERIAL PRIMARY KEY,
+        nombre TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        telefono TEXT,
+        direccion TEXT,
+        ciudad TEXT,
+        creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
       CREATE TABLE IF NOT EXISTS pedidos (
         id SERIAL PRIMARY KEY,
         items JSONB NOT NULL,
         total NUMERIC NOT NULL,
         estado TEXT DEFAULT 'pendiente',
+        cliente_id INTEGER,
         creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
-    `)
-
-    await pool.query(`
-  DROP TABLE IF EXISTS pedidos;
-  CREATE TABLE pedidos (
-    id SERIAL PRIMARY KEY,
-    items JSONB NOT NULL,
-    total NUMERIC NOT NULL,
-    estado TEXT DEFAULT 'pendiente',
-    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  );
-`)
-console.log('Tabla pedidos recreada')
-
-    await pool.query(`
-      ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
     `)
 
     console.log('Base de datos lista')

@@ -1,23 +1,22 @@
 import axios from 'axios'
 
-//Direccion del backend
-//const api = axios.create({
-//  baseURL: 'http://localhost:4000/api'
-//})
-
-//Direccion del backend
 const api = axios.create({
-  baseURL: 'https://marcecos-backend.onrender.com/api'
+  baseURL: 'http://localhost:4000/api'
 })
 
-
-// Esto agrega el token automaticamente en cada peticion
+// Agrega el token automáticamente en cada petición
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token')
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
+  // Token del admin
+  const tokenAdmin = localStorage.getItem('token')
+  // Token del cliente
+  const tokenCliente = localStorage.getItem('cliente_token')
+
+  const token = tokenAdmin || tokenCliente
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
 })
 
 export default api
