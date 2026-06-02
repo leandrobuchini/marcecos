@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native'
 import { useState, useEffect } from 'react'
 import api from '../services/api'
 import { useCarrito } from '../context/CarritoContext'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export default function CatalogoScreen() {
   const navigation = useNavigation()
@@ -10,16 +11,17 @@ export default function CatalogoScreen() {
   const [busqueda, setBusqueda] = useState('')
   const [categoriaActiva, setCategoriaActiva] = useState('Todos')
   const [cargando, setCargando] = useState(true)
+  const [clienteLogueado, setClienteLogueado] = useState(null)
   const { agregarAlCarrito, cantidadItems } = useCarrito()
 
   const categorias = ['Todos', 'Juegos', 'Maderas', 'Bebes', 'Exterior', 'Educativos']
 
   useEffect(() => {
+    AsyncStorage.getItem('cliente').then(data => {
+      if (data) setClienteLogueado(JSON.parse(data))
+    })
     api.get('/productos')
-      .then(res => {
-        const data = Array.isArray(res.data) ? res.data : []
-        setProductos(data)
-      })
+      .then(res => setProductos(Array.isArray(res.data) ? res.data : []))
       .catch(err => console.log(err))
       .finally(() => setCargando(false))
   }, [])
@@ -66,6 +68,23 @@ export default function CatalogoScreen() {
       <View style={styles.navbar}>
         <Text style={styles.navTitulo}>Marcecos</Text>
         <View style={styles.navRight}>
+          {clienteLogueado ? (
+            <TouchableOpacity
+              style={styles.btnPerfil}
+              onPress={() => navigation.navigate('Perfil')}
+            >
+              <Text style={styles.btnPerfilText}>
+                {clienteLogueado.nombre?.charAt(0).toUpperCase()}
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.btnAdmin}
+              onPress={() => navigation.navigate('Login')}
+            >
+              <Text style={styles.btnAdminText}>Ingresar</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             style={styles.btnAdmin}
             onPress={() => navigation.navigate('AdminLogin')}
@@ -170,10 +189,7 @@ const styles = StyleSheet.create({
     width: 16, height: 16, alignItems: 'center', justifyContent: 'center'
   },
   badgeText: { color: '#fff', fontSize: 9, fontWeight: '700' },
-  hero: {
-    backgroundColor: '#0a0a0a',
-    padding: 20,
-  },
+  hero: { backgroundColor: '#0a0a0a', padding: 20 },
   heroTag: { color: '#555', fontSize: 9, letterSpacing: 3, fontWeight: '500', marginBottom: 6 },
   heroTitle: { color: '#fff', fontSize: 18, fontWeight: '600', letterSpacing: -0.3, marginBottom: 12 },
   heroBtn: { backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20, alignSelf: 'flex-start' },
@@ -214,4 +230,9 @@ const styles = StyleSheet.create({
   },
   btnAgregarText: { color: '#fff', fontSize: 18, lineHeight: 22 },
   sinProductos: { textAlign: 'center', color: '#aaa', marginTop: 40, fontSize: 14 },
+  btnPerfil: {
+    width: 30, height: 30, borderRadius: 15,
+    backgroundColor: '#0a0a0a', alignItems: 'center', justifyContent: 'center'
+  },
+  btnPerfilText: { color: '#fff', fontSize: 13, fontWeight: '700' },
 })

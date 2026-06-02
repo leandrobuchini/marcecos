@@ -9,6 +9,9 @@ import DetalleScreen from './src/screens/DetalleScreen'
 import ConfirmacionScreen from './src/screens/ConfirmacionScreen'
 import AdminLoginScreen from './src/screens/AdminLoginScreen'
 import AdminPanelScreen from './src/screens/AdminPanelScreen'
+import LoginScreen from './src/screens/LoginScreen'
+import RegistroScreen from './src/screens/RegistroScreen'
+import PerfilScreen from './src/screens/PerfilScreen'
 
 const Stack = createNativeStackNavigator()
 
@@ -24,6 +27,9 @@ export default function App() {
           <Stack.Screen name="Confirmacion" component={ConfirmacionScreen} />
           <Stack.Screen name="AdminLogin" component={AdminLoginScreen} />
           <Stack.Screen name="AdminPanel" component={AdminPanelScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Registro" component={RegistroScreen} />
+          <Stack.Screen name="Perfil" component={PerfilScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </CarritoProvider>
